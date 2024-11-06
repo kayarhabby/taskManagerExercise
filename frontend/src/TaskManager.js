@@ -8,9 +8,17 @@ function TaskManager() {
     // Fetch tasks from the backend
     useEffect(() => {
         fetch('http://localhost:3000/tasks')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => setTasks(data))
-            .catch(err => console.error(err));
+            .catch(err => {
+                setError(`Failed to fetch tasks: ${err.message}`);
+                console.error(err);
+            });
     }, []);
 
     const addTask = () => {
@@ -23,18 +31,26 @@ function TaskManager() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title })
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 setTasks([...tasks, data]);
                 setTitle('');
                 setError('');
             })
             .catch(error => {
-                if (error.response && error.response.status === 400) {
+                if (error.message.includes('400')) {
                     setError('Erreur: Titre requis ou JSON invalide');
+                } else if (error.message.includes('404')) {
+                    setError('Erreur: URL non trouvée');
                 } else {
-                    console.error(error);
+                    setError('Erreur lors de l\'ajout de la tâche');
                 }
+                console.error(error);
             });
     };
 
