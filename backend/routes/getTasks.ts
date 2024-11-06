@@ -18,5 +18,4 @@ function getTasks(req: IncomingMessage, res: ServerResponse): void {
     res.end(JSON.stringify(tasks));
 }
 
-// Exporting the getTasks function as the default export for use in routing
 export default getTasks;
